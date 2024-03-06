@@ -13,7 +13,6 @@ export class MovementAction extends Action {
   perform() {
     const { entity, dx, dy } = this;
     const { ecs, map } = this.game;
-    console.log({ entity, ecs });
     const comp = ecs.get_components(entity);
     const pos = comp.get(Position);
     const l = map.currentLevel();

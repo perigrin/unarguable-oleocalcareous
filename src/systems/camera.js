@@ -6,17 +6,17 @@ export class CameraSystem extends System {
 
   constructor(g) {
     super(g);
-    const { ecs, ctx, map, player } = g;
+    const { ecs, ctx, map, player, style, sprites } = g;
     this.ecs = ecs;
     this.ctx = ctx;
     this.map = map;
     this.player = player;
-    this.foreground = g.style.color;
-    this.highlight = g.style.highlightColor;
-    this.spritesheet = g.spritesheet;
+    this.foreground = style.color;
+    this.highlight = style.highlightColor;
+    this.spritesheet = sprites;
   }
 
-  SHOW_BOUNDS = true;
+  SHOW_BOUNDS = false;
 
   drawSprite(sprite, x, y) {
     this.ctx.drawImage(
@@ -25,10 +25,10 @@ export class CameraSystem extends System {
       sprite[1] * this.map.tileSize,
       this.map.tileSize,
       this.map.tileSize,
-      x * this.map.tileSize,
-      y * this.map.tileSize,
-      this.map.tileSize,
-      this.map.tileSize,
+      (x * this.map.tileSize) / 2,
+      (y * this.map.tileSize) / 2,
+      this.map.tileSize / 2,
+      this.map.tileSize / 2,
     );
   }
 
@@ -47,17 +47,18 @@ export class CameraSystem extends System {
           if (t.visible) {
             ctx.fillStyle = this.highlight;
           }
-          if (t.seen)
+          /* if (t.seen)
             ctx.fillText(
               t.char,
               x * map.tileSize,
               y * map.tileSize,
               map.tileSize,
             );
-          //if (t.seen) this.drawSprite(t.sprite, x, y)
+            */
+          if (t.seen) this.drawSprite(t.sprite, x, y);
         } else {
           if (this.SHOW_BOUNDS) {
-            ctx.fillText("x", x * map.tileSize, y * map.tileSize, map.tileSize);
+            //  ctx.fillText("x", x * map.tileSize, y * map.tileSize, map.tileSize);
           }
         }
         x++;
@@ -107,8 +108,8 @@ export class CameraSystem extends System {
         const x = pos.x - min.x;
         const y = pos.y - min.y;
         if (level.inBounds(x, y)) {
-          ctx.fillText(a.char, x * map.tileSize, y * map.tileSize);
-          //this.drawSprite(a.sprite, x, y);
+          //ctx.fillText(a.char, x * map.tileSize, y * map.tileSize);
+          this.drawSprite(a.sprite, x, y);
         }
       });
   }

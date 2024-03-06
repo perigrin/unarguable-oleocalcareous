@@ -10,8 +10,7 @@ import { SimpleLevelBuilder } from "./map/level_builder.js";
 export class GameMap {
   builder = new SimpleLevelBuilder();
   levels = [];
-
-  constructor({ width = 80, height = 45, tileSize = 4 }) {
+  constructor({ width = 160, height = 90, tileSize = 64 }) {
     this.width = width;
     this.height = height;
     this.tileSize = tileSize;

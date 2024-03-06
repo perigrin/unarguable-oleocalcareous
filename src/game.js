@@ -28,6 +28,7 @@ const css = `
     :host {
         display: flex;
         width: 100%;
+        aspect-ratio: 16/9;
         align-items: center;
         justify-content: center;
         background-color: black;
@@ -36,36 +37,56 @@ const css = `
 
     canvas {
         outline: 1px solid black;
-        width: 90%;
-        aspect-ratio: 16/9;
       }
 `;
 
 class Game extends HTMLElement {
   ecs = new ECS();
-  map = new GameMap({});
+  mapwidth = 80;
+  mapheight = 45;
+  tilesize = 64;
+  spritesheet = "/img/doodle_rogue/tiles-64.png";
+
+  static observedAttributes = [
+    "mapheight",
+    "mapwidth",
+    "tilesize",
+    "spritesheet",
+  ];
 
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
   }
+
   #initCanvas() {
+    const dpr = window.devicePixelRatio;
     this.canvas = document.createElement("canvas");
-    this.shadow.appendChild(this.canvas);
+
+    const rect = this.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+
     this.ctx = this.canvas.getContext("2d");
-    this.ctx.font = this.map.tileSize + "px monospace";
+    this.ctx.scale(dpr, dpr);
+
+    this.canvas.style.width = `${rect.width}px`;
+    this.canvas.style.height = `${rect.height}px`;
+
+    this.shadow.appendChild(this.canvas);
+    //this.ctx.font = this.map.tileSize + "px monospace";
   }
 
   #initUI() {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(css);
     this.shadow.adoptedStyleSheets = [sheet];
-    this.#initCanvas();
     this.style.color = window.getComputedStyle(this).color;
     this.style.backgroundColor = window.getComputedStyle(this).backgroundColor;
     this.style.highlightColor = "yellow"; // TODO figure out how to get this in CSS
-    this.spritesheet = new Image();
-    this.spritesheet.src = "/assets/doodle_rogue/tiles-64.png";
+    this.sprites = new Image();
+    this.sprites.src = this.spritesheet;
+    this.#initCanvas();
   }
 
   #initSystems() {
@@ -118,20 +139,39 @@ class Game extends HTMLElement {
   #processInput() {
     const player = this.ecs.get_components(this.player).get(ActionQueue);
     for (const key in this.keys) {
-      console.log({ key });
       if (this.keymap[key] === undefined) continue;
-      console.log(this.keymap[key]);
       player.nextAction = this.keymap[key];
     }
     this.keys = {};
   }
 
+  #initMap() {
+    this.map = new GameMap({
+      width: this.mapwidth,
+      height: this.mapheight,
+      tileSize: this.tilesize,
+    });
+  }
+
   #init() {
     this.#initUI();
+    this.#initMap();
     this.#initPlayer();
     this.#initSystems();
     this.#initKeymap();
     this.#initEventHandlers();
+  }
+
+  #updateUI() {
+    this.sprites = new Image();
+    this.sprites.src = this.spritesheet;
+    // TODO figure out how to tell everything our sizes have changed
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    // console.log(`changing ${name} to ${newValue} (${oldValue})`);
+    this[name] = newValue;
+    this.#updateUI();
   }
 
   connectedCallback() {

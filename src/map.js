@@ -5,7 +5,7 @@ export const MDistance = (h, t) => Math.abs(h.x - t.x) + Math.abs(h.y - t.y);
 
 import { Tile } from "./map/tile.js";
 import { Room } from "./map/room.js";
-import { SimpleLevelBuilder } from "./map/level_builder.js";
+import { SimpleLevelBuilder } from "./map/builder/simple.js";
 
 export class GameMap {
   builder = new SimpleLevelBuilder();
